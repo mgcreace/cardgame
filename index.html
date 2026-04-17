@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Card Game</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     body {
       font-family: Arial;
       background: #0f0f0f;
       color: white;
       text-align: center;
-      padding-top: 80px;
+      padding-top: 60px;
     }
 
     button {
@@ -17,12 +20,25 @@
       font-size: 18px;
       border-radius: 12px;
       cursor: pointer;
+      margin: 10px;
     }
 
     #card {
-      margin-top: 40px;
+      margin-top: 30px;
       font-size: 26px;
       color: gold;
+    }
+
+    #coins {
+      font-size: 20px;
+      margin-top: 20px;
+      color: #00ff88;
+    }
+
+    #user {
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -31,15 +47,80 @@
 
 <h1>🎴 Card Game</h1>
 
-<button onclick="drawCard()">Karte ziehen</button>
+<div id="user">User: loading...</div>
+
+<div id="coins">💰 Coins: 0</div>
+
+<button onclick="drawCard()">🎴 Karte ziehen</button>
+<button onclick="addCoins()">💰 Coins +10</button>
+<button onclick="resetGame()">🔄 Reset</button>
 
 <div id="card"></div>
 
 <script>
+/* ---------------- TELEGRAM INIT ---------------- */
+
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+const user = tg.initDataUnsafe.user;
+const userId = user ? user.id : "local-test";
+
+document.getElementById("user").innerText =
+"User ID: " + userId;
+
+/* ---------------- SAVE SYSTEM ---------------- */
+
+let data = JSON.parse(localStorage.getItem("cardgame_" + userId)) || {
+  coins: 0,
+  cards: []
+};
+
+function save() {
+  localStorage.setItem("cardgame_" + userId, JSON.stringify(data));
+  updateUI();
+}
+
+/* ---------------- UI UPDATE ---------------- */
+
+function updateUI() {
+  document.getElementById("coins").innerText =
+  "💰 Coins: " + data.coins;
+}
+
+updateUI();
+
+/* ---------------- GAME LOGIC ---------------- */
+
+const cards = [
+  "🔥 Feuerdrache",
+  "🌲 Waldelf",
+  "🪨 Steingolem",
+  "⚡ Blitz Magier",
+  "🧊 Eis Golem"
+];
+
 function drawCard() {
-  const cards = ["🔥 Feuerdrache", "🌲 Waldelf", "🪨 Steingolem", "⚡ Blitz Magier"];
   const card = cards[Math.floor(Math.random() * cards.length)];
-  document.getElementById("card").innerText = card;
+
+  data.cards.push(card);
+  data.coins += 5;
+
+  document.getElementById("card").innerText =
+  "Du hast gezogen: " + card;
+
+  save();
+}
+
+function addCoins() {
+  data.coins += 10;
+  save();
+}
+
+function resetGame() {
+  data = { coins: 0, cards: [] };
+  save();
+  document.getElementById("card").innerText = "";
 }
 </script>
 
