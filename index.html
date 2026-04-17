@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Card Game</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f0f0f;
+      color: white;
+      text-align: center;
+      padding-top: 80px;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #card {
+      margin-top: 40px;
+      font-size: 26px;
+      color: gold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🎴 Card Game</h1>
+
+<button onclick="drawCard()">Karte ziehen</button>
+
+<div id="card"></div>
+
+<script>
+function drawCard() {
+  const cards = ["🔥 Feuerdrache", "🌲 Waldelf", "🪨 Steingolem", "⚡ Blitz Magier"];
+  const card = cards[Math.floor(Math.random() * cards.length)];
+  document.getElementById("card").innerText = card;
+}
+</script>
+
+</body>
+</html>
