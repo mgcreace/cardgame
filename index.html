@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Card Game</title>
+  <title>Card Game Shop</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -12,53 +12,57 @@
       background: #0f0f0f;
       color: white;
       text-align: center;
-      padding-top: 60px;
+      padding-top: 40px;
     }
 
     button {
-      padding: 15px 25px;
-      font-size: 18px;
-      border-radius: 12px;
-      cursor: pointer;
+      padding: 12px 20px;
       margin: 10px;
-    }
-
-    #card {
-      margin-top: 30px;
-      font-size: 26px;
-      color: gold;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
     }
 
     #coins {
-      font-size: 20px;
-      margin-top: 20px;
       color: #00ff88;
+      font-size: 20px;
+      margin: 10px;
     }
 
     #user {
-      font-size: 14px;
       opacity: 0.7;
       margin-bottom: 20px;
+    }
+
+    .shop {
+      margin-top: 30px;
+      border-top: 1px solid #333;
+      padding-top: 20px;
     }
   </style>
 </head>
 
 <body>
 
-<h1>🎴 Card Game</h1>
+<h1>🎴 Card Game Shop</h1>
 
-<div id="user">User: loading...</div>
-
+<div id="user">Loading...</div>
 <div id="coins">💰 Coins: 0</div>
 
-<button onclick="drawCard()">🎴 Karte ziehen</button>
-<button onclick="addCoins()">💰 Coins +10</button>
-<button onclick="resetGame()">🔄 Reset</button>
+<button onclick="addCoins()">+10 Coins Test</button>
 
-<div id="card"></div>
+<div class="shop">
+  <h2>💰 Shop</h2>
+
+  <button onclick="buyCoins(50)">50 Coins</button>
+  <button onclick="buyCoins(200)">200 Coins</button>
+  <button onclick="buyCoins(1000)">1000 Coins</button>
+
+  <div id="shopStatus"></div>
+</div>
 
 <script>
-/* ---------------- TELEGRAM INIT ---------------- */
+/* ---------------- TELEGRAM ---------------- */
 
 const tg = window.Telegram?.WebApp;
 tg?.expand();
@@ -66,50 +70,23 @@ tg?.expand();
 const user = tg?.initDataUnsafe?.user;
 
 const userId = user ? user.id : null;
-const username = user ? user.first_name : "Open in Telegram";
+const username = user ? user.first_name : "Guest";
 
-if (!userId) {
-  document.getElementById("user").innerText =
-    "⚠️ Bitte öffne das Spiel in Telegram";
-} else {
-  document.getElementById("user").innerText =
-    "User: " + username + " (" + userId + ")";
-}
+document.getElementById("user").innerText =
+userId ? `User: ${username}` : "⚠️ Open in Telegram";
 
-/* ---------------- SAVE SYSTEM ---------------- */
+/* ---------------- SAVE ---------------- */
 
-let data = JSON.parse(localStorage.getItem("cardgame_" + userId)) || {
+let data = JSON.parse(localStorage.getItem("game_" + userId)) || {
   coins: 0,
   cards: []
 };
 
-/* ---------------- SAVE + SYNC ---------------- */
-
 function save() {
-  localStorage.setItem("cardgame_" + userId, JSON.stringify(data));
+  localStorage.setItem("game_" + userId, JSON.stringify(data));
   updateUI();
   sendToBot();
 }
-
-/* ---------------- TELEGRAM SYNC ---------------- */
-
-function sendToBot() {
-  try {
-    window.Telegram.WebApp.sendData(JSON.stringify({
-      userId: userId,
-      coins: data.coins,
-      cards: data.cards
-    }));
-  } catch (e) {
-    console.log("Telegram sendData not available");
-  }
-}
-
-/* ---------------- AUTO SYNC ---------------- */
-
-setInterval(() => {
-  sendToBot();
-}, 5000);
 
 /* ---------------- UI ---------------- */
 
@@ -120,40 +97,35 @@ function updateUI() {
 
 updateUI();
 
-/* ---------------- GAME LOGIC ---------------- */
+/* ---------------- SYNC ---------------- */
 
-const cards = [
-  "🔥 Feuerdrache",
-  "🌲 Waldelf",
-  "🪨 Steingolem",
-  "⚡ Blitz Magier",
-  "🧊 Eis Golem"
-];
-
-function drawCard() {
-  const card = cards[Math.floor(Math.random() * cards.length)];
-
-  data.cards.push(card);
-  data.coins += 5;
-
-  document.getElementById("card").innerText =
-    "Du hast gezogen: " + card;
-
-  save();
+function sendToBot() {
+  try {
+    tg.sendData(JSON.stringify({
+      coins: data.coins,
+      cards: data.cards
+    }));
+  } catch {}
 }
+
+/* ---------------- GAME TEST ---------------- */
 
 function addCoins() {
   data.coins += 10;
   save();
 }
 
-function resetGame() {
-  data = { coins: 0, cards: [] };
-  save();
+/* ---------------- SHOP ---------------- */
 
-  document.getElementById("card").innerText = "";
+function buyCoins(amount) {
+  tg.sendData(JSON.stringify({
+    action: "buy_coins",
+    amount: amount
+  }));
+
+  document.getElementById("shopStatus").innerText =
+    "✅ Kauf gesendet: " + amount;
 }
-
 </script>
 
 </body>
