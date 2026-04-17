@@ -5,7 +5,16 @@
   <title>Card Game</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+function sendToBot() {
+  const dataToSend = {
+    coins: data.coins,
+    cards: data.cards
+  };
 
+  window.Telegram.WebApp.sendData(JSON.stringify(dataToSend));
+}
+</script>
   <style>
     body {
       font-family: Arial;
